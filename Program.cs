@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.Reflection.Metadata;
+using System.Text.Json;
 
 namespace HelloWorld
 {
@@ -24,7 +25,7 @@ namespace HelloWorld
 
         int id;
         public void Add (string desc){
-            id = tasks.Count != 0 ? tasks.Max(tasks => tasks.Id) : 1;
+            id = tasks.Count != 0 ? tasks.Max(tasks => tasks.Id) + 1 : 1;
             if (desc == "null"){
                 Console.WriteLine("No description Provied, Createing New Empty Task");
                 tasks.Add(new TaskItem { Id = id });
@@ -67,8 +68,17 @@ namespace HelloWorld
             WriteFile();
         }
 
-        private void ReadFile () {}
-        private void WriteFile () {}
+        private void ReadFile () {
+            if (File.Exists(fileName))
+        {
+            string json = File.ReadAllText(fileName);
+            tasks = JsonSerializer.Deserialize<List<TaskItem>>(json) ?? new();
+        }
+        }
+        private void WriteFile () {
+            var json = JsonSerializer.Serialize(tasks, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(fileName, json);
+        }
     }
 
     class Program
